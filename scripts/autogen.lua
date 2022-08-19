@@ -87,13 +87,13 @@ local generate_builtin_description = function(source)
     } or {}
 end
 
-local generate_builtin_usage = function(method, name)
+local generate_builtin_usage = function(source, method, name)
     return {
         "",
         "#### Usage",
         "",
         "```lua",
-        string.format("local sources = { null_ls.builtins.%s.%s }", method, name),
+        source.meta.usage or string.format("local sources = { null_ls.builtins.%s.%s }", method, name),
         "```",
     }
 end
@@ -125,10 +125,8 @@ local generate_builtin_defaults = function(source, method, name)
             if type(command) == "string" then
                 command_content = string.format("`%s`", command)
             else
-                command_content = string.format(
-                    "dynamically resolved (see [source](%s))",
-                    generate_repo_url(method, name)
-                )
+                command_content =
+                    string.format("dynamically resolved (see [source](%s))", generate_repo_url(method, name))
             end
             vim.list_extend(defaults, {
                 "- Command: " .. command_content,
@@ -171,7 +169,7 @@ local generate_builtin_content = function(source, method, name)
     local content = { "" }
     vim.list_extend(content, generate_builtin_header(source, name))
     vim.list_extend(content, generate_builtin_description(source))
-    vim.list_extend(content, generate_builtin_usage(method, name))
+    vim.list_extend(content, generate_builtin_usage(source, method, name))
     vim.list_extend(content, generate_builtin_defaults(source, method, name))
     vim.list_extend(content, generate_builtin_notes(source))
 

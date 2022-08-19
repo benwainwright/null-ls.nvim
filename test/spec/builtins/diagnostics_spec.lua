@@ -1,6 +1,25 @@
 local diagnostics = require("null-ls.builtins").diagnostics
 
 describe("diagnostics", function()
+    describe("buf", function()
+        local linter = diagnostics.buf
+        local parser = linter._opts.on_output
+
+        it("should create a diagnostic with an Error severity", function()
+            local file = {
+                [[ syntax = "proto3"; package tutorial.v1;]],
+            }
+            local output =
+                [[demo.proto:2:1:Files with package "tutorial.v1" must be within a directory "tutorial/v1" relative to root but were in directory ".".]]
+            local diagnostic = parser(output, { content = file })
+            assert.same({
+                col = "1",
+                filename = "demo.proto",
+                message = [[Files with package "tutorial.v1" must be within a directory "tutorial/v1" relative to root but were in directory ".".]],
+                row = "2",
+            }, diagnostic)
+        end)
+    end)
     describe("chktex", function()
         local linter = diagnostics.chktex
         local parser = linter._opts.on_output
@@ -323,41 +342,48 @@ describe("diagnostics", function()
         local parser = linter._opts.on_output
         local file = {
             [[require("settings").load_options()]],
-            "vim.cmd [[",
-            [[local command = table.concat(vim.tbl_flatten { "autocmd", def }, " ")]],
+            "vim.cmd [[ ]]",
+            "local b = 3 + 34",
         }
+        local output = table.concat({
+            "1 warning:",
+            "tmp.tl:3:7: unused variable b: integer",
+            "2 errors:",
+            "tmp.tl:1:8: module not found: 'settings'",
+            "tmp.tl:2:1: unknown variable: vim",
+        }, "\n")
 
-        it("should create a diagnostic (quote field is between quotes)", function()
-            local output = [[init.lua:1:8: module not found: 'settings']]
-            local diagnostic = parser(output, { content = file })
+        local teal_diagnostics = nil
+        local function done(_diagnostics)
+            teal_diagnostics = _diagnostics
+        end
+        parser({ content = file, output = output, temp_path = "tmp.tl" }, done)
+
+        it("should create a diagnostic with a warning severity (no quote)", function()
+            assert.same({
+                row = "3",
+                col = "7",
+                message = "unused variable b: integer",
+                severity = 2,
+            }, teal_diagnostics[1])
+        end)
+        it("should create a diagnostic with an error severity (quote field is between quotes)", function()
             assert.same({
                 row = "1",
                 col = "8",
-                end_col = 17,
+                end_col = 18,
                 message = "module not found: 'settings'",
-                source = "tl check",
-            }, diagnostic)
+                severity = 1,
+            }, teal_diagnostics[2])
         end)
-        it("should create a diagnostic (quote field is not between quotes)", function()
-            local output = [[init.lua:2:1: unknown variable: vim]]
-            local diagnostic = parser(output, { content = file })
+        it("should create a diagnostic with an error severity (quote field is not between quotes)", function()
             assert.same({
                 row = "2",
                 col = "1",
-                end_col = 3,
+                end_col = 4,
                 message = "unknown variable: vim",
-                source = "tl check",
-            }, diagnostic)
-        end)
-        it("should create a diagnostic by using the second pattern", function()
-            local output = [[autocmds.lua:3:46: argument 1: got <unknown type>, expected {string}]]
-            local diagnostic = parser(output, { content = file })
-            assert.same({
-                row = "3",
-                col = "46",
-                message = "argument 1: got <unknown type>, expected {string}",
-                source = "tl check",
-            }, diagnostic)
+                severity = 1,
+            }, teal_diagnostics[3])
         end)
     end)
 
@@ -454,6 +480,43 @@ describe("diagnostics", function()
                 severity = 2,
                 code = "unused_variable",
                 message = "CACHE_PATH is defined, but never used",
+            }, diagnostic)
+        end)
+    end)
+
+    describe("solhint", function()
+        local linter = diagnostics.solhint
+        local parser = linter._opts.on_output
+
+        it("should create a diagnostic with an Error severity", function()
+            local file = {
+                [[ import 'interfaces/IToken.sol'; ]],
+            }
+            local output = "contracts/Token.sol:22:8: Use double quotes for string literals [Error/quotes]"
+            local diagnostic = parser(output, { content = file })
+            assert.same({
+                code = "quotes",
+                col = "8",
+                filename = "contracts/Token.sol",
+                message = "Use double quotes for string literals",
+                row = "22",
+                severity = 1,
+            }, diagnostic)
+        end)
+
+        it("should create a diagnostic with a Warning severity", function()
+            local file = {
+                [[ function somethingPrivate(uint8 id) returns (bool) {}; ]],
+            }
+            local output = "contracts/Token.sol:359:5: Explicitly mark visibility in function [Warning/func-visibility]"
+            local diagnostic = parser(output, { content = file })
+            assert.same({
+                code = "func-visibility",
+                col = "5",
+                filename = "contracts/Token.sol",
+                message = "Explicitly mark visibility in function",
+                row = "359",
+                severity = 2,
             }, diagnostic)
         end)
     end)
@@ -951,6 +1014,231 @@ describe("diagnostics", function()
                     message = "[risky-file-permissions] File permissions unset or incorrect",
                     filename = "playbooks/test-ansible.yaml",
                 },
+            }, diagnostic)
+        end)
+    end)
+
+    describe("hamllint", function()
+        local linter = diagnostics.haml_lint
+        local parser = linter._opts.on_output
+
+        it("should create a diagnostic with warning severity", function()
+            local output = vim.json.decode([[
+                {
+                    "files": [
+                        {
+                            "path": "app/vies/test.html.haml",
+                            "offenses": [
+                                {
+                                    "severity": "warning",
+                                    "message": "Line is too long. [102/80]",
+                                    "location": {
+                                        "line": 7
+                                    },
+                                    "linter_name": "LineLength"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]])
+
+            local diagnostic = parser({ output = output })
+            assert.same({
+                {
+                    row = 7,
+                    severity = 2,
+                    code = "LineLength",
+                    message = "Line is too long. [102/80]",
+                },
+            }, diagnostic)
+        end)
+    end)
+
+    describe("erblint", function()
+        local linter = diagnostics.erb_lint
+        local parser = linter._opts.on_output
+
+        it("should create a diagnostic with warning severity", function()
+            local output = vim.json.decode([[
+                {
+                    "files": [
+                        {
+                            "path": "test.html.erb",
+                            "offenses": [
+                                {
+                                    "linter": "SpaceInHtmlTag",
+                                    "message": "Extra space detected where there should be no space.",
+                                    "location": {
+                                        "start_line": 1,
+                                        "start_column": 4,
+                                        "last_line": 1,
+                                        "last_column": 7,
+                                        "length": 3
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]])
+
+            local diagnostic = parser({ output = output })
+            assert.same({
+                {
+                    row = 1,
+                    end_row = 1,
+                    col = 4,
+                    end_col = 8,
+                    code = "SpaceInHtmlTag",
+                    message = "Extra space detected where there should be no space.",
+                },
+            }, diagnostic)
+        end)
+    end)
+
+    describe("mypy", function()
+        local linter = diagnostics.mypy
+        local parser = linter._opts.on_output
+        it("should handle full diagnostic", function()
+            local output =
+                'test.py:1:1: error: Library stubs not installed for "requests" (or incompatible with Python 3.9)  [import]'
+            local diagnostic = parser(output, {})
+            assert.same({
+                row = "1",
+                col = "1",
+                severity = 1,
+                message = 'Library stubs not installed for "requests" (or incompatible with Python 3.9)',
+                filename = "test.py",
+                code = "import",
+            }, diagnostic)
+        end)
+
+        it("should diagnostic without code", function()
+            local output = 'test.py:1:1: note: Hint: "python3 -m pip install types-requests"'
+            local diagnostic = parser(output, {})
+            assert.same({
+                row = "1",
+                col = "1",
+                severity = 3,
+                message = 'Hint: "python3 -m pip install types-requests"',
+                filename = "test.py",
+            }, diagnostic)
+        end)
+
+        it("should handle diagnostic with no column or error code", function()
+            local output = [[tests/slack_app/conftest.py:10: error: Unused "type: ignore" comment]]
+            local diagnostic = parser(output, {})
+            assert.same({
+                row = "10",
+                severity = 1,
+                message = 'Unused "type: ignore" comment',
+                filename = "tests/slack_app/conftest.py",
+            }, diagnostic)
+        end)
+    end)
+
+    describe("opacheck", function()
+        local linter = diagnostics.opacheck
+        local parser = linter._opts.on_output
+
+        it("should create a diagnostic with error severity", function()
+            local output = vim.json.decode([[
+            {
+              "errors": [
+                {
+                  "message": "var tenant_id is unsafe",
+                  "code": "rego_unsafe_var_error",
+                  "location": {
+                    "file": "src/geo.rego",
+                    "row": 49,
+                    "col": 3
+                  }
+                }
+              ]
+            } ]])
+            local diagnostic = parser({ output = output })
+            assert.same({
+                {
+                    row = 49,
+                    col = 3,
+                    severity = 1,
+                    message = "var tenant_id is unsafe",
+                    filename = "src/geo.rego",
+                    source = "opacheck",
+                    code = "rego_unsafe_var_error",
+                },
+            }, diagnostic)
+        end)
+
+        it("should not create a diagnostic without location", function()
+            local output = vim.json.decode([[
+            {
+              "errors": [
+                {
+                  "message": "var tenant_id is unsafe",
+                  "code": "rego_unsafe_var_error"
+                }
+              ]
+            } ]])
+            local diagnostic = parser({ output = output })
+            assert.same({}, diagnostic)
+        end)
+    end)
+    describe("glslc", function()
+        local linter = diagnostics.glslc
+        local parser = linter._opts.on_output
+
+        -- some of the example output gotten from: https://github.com/google/shaderc/blob/main/glslc/test/messages_tests.py
+        it("glslc error", function()
+            local output =
+                [[glslc: error: 'path/to/tempfile.glsl': .glsl file encountered but no -fshader-stage specified ahead]]
+            local diagnostic = parser(output, {})
+            assert.same({
+                severity = 1,
+                message = ".glsl file encountered but no -fshader-stage specified ahead",
+            }, diagnostic)
+        end)
+        it("line error with quotes", function()
+            local output =
+                [[filename.glsl:14: error: 'non-opaque uniforms outside a block' : not allowed when using GLSL for Vulkan]]
+            local diagnostic = parser(output, {})
+            assert.same({
+                filename = "filename.glsl",
+                row = "14",
+                severity = 1,
+                message = "'non-opaque uniforms outside a block' : not allowed when using GLSL for Vulkan",
+            }, diagnostic)
+        end)
+        it("line error with empty quotes", function()
+            local output = [[filename2.glsl:2: error: '' : function does not return a value: main]]
+            local diagnostic = parser(output, {})
+            assert.same({
+                filename = "filename2.glsl",
+                row = "2",
+                severity = 1,
+                message = "'' : function does not return a value: main",
+            }, diagnostic)
+        end)
+        it("line warning without quotes", function()
+            local output =
+                [[filename3.glsl:2: warning: attribute deprecated in version 130; may be removed in future release]]
+            local diagnostic = parser(output, {})
+            assert.same({
+                filename = "filename3.glsl",
+                row = "2",
+                severity = 2,
+                message = "attribute deprecated in version 130; may be removed in future release",
+            }, diagnostic)
+        end)
+        it("file warning", function()
+            local output =
+                [[filename4.glsl: warning: (version, profile) forced to be (400, none), while in source code it is (550, none)]]
+            local diagnostic = parser(output, {})
+            assert.same({
+                filename = "filename4.glsl",
+                severity = 2,
+                message = "(version, profile) forced to be (400, none), while in source code it is (550, none)",
             }, diagnostic)
         end)
     end)

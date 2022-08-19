@@ -18,6 +18,7 @@ describe("diagnostics", function()
         stub(u, "make_params")
         stub(generators, "run_registered")
         stub(vim, "uri_to_bufnr")
+        stub(vim.api, "nvim_buf_is_valid")
 
         local mock_uri = "file:///mock-file"
         local mock_handler = stub.new()
@@ -39,6 +40,7 @@ describe("diagnostics", function()
 
             u.make_params.returns(mock_params)
             vim.uri_to_bufnr.returns(mock_bufnr)
+            vim.api.nvim_buf_is_valid.returns(true)
         end)
 
         after_each(function()
@@ -49,6 +51,7 @@ describe("diagnostics", function()
             generators.run_registered:clear()
             u.make_params:clear()
             vim.uri_to_bufnr:clear()
+            vim.api.nvim_buf_is_valid:clear()
 
             s.reset()
             c.reset()
@@ -157,11 +160,9 @@ describe("diagnostics", function()
 
                     assert.stub(diagnostic_api.set).was_called(#mock_diagnostics)
                     for id in pairs(mock_diagnostics) do
-                        assert.stub(diagnostic_api.set).was_called_with(
-                            diagnostics.get_namespace(id),
-                            mock_bufnr,
-                            mock_diagnostics[id]
-                        )
+                        assert
+                            .stub(diagnostic_api.set)
+                            .was_called_with(diagnostics.get_namespace(id), mock_bufnr, mock_diagnostics[id])
                     end
                 end)
             end)
@@ -185,11 +186,9 @@ describe("diagnostics", function()
 
                     assert.stub(diagnostic_api.set).was_called(#mock_diagnostics)
                     for id in pairs(mock_diagnostics) do
-                        assert.stub(diagnostic_api.set).was_called_with(
-                            diagnostics.get_namespace(id),
-                            mock_diagnostics[id][1].bufnr,
-                            mock_diagnostics[id]
-                        )
+                        assert
+                            .stub(diagnostic_api.set)
+                            .was_called_with(diagnostics.get_namespace(id), mock_diagnostics[id][1].bufnr, mock_diagnostics[id])
                     end
                 end)
 
@@ -207,11 +206,9 @@ describe("diagnostics", function()
                     -- twice per old diagnostic
                     assert.stub(diagnostic_api.set).was_called(#mock_diagnostics + 2)
                     for id in pairs(mock_diagnostics) do
-                        assert.stub(diagnostic_api.set).was_called_with(
-                            diagnostics.get_namespace(id),
-                            old_diagnostics[1].bufnr,
-                            {}
-                        )
+                        assert
+                            .stub(diagnostic_api.set)
+                            .was_called_with(diagnostics.get_namespace(id), old_diagnostics[1].bufnr, {})
                     end
                 end)
 

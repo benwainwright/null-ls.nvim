@@ -52,11 +52,8 @@ local defaults = {
     default_timeout = 5000,
     diagnostics_format = "#{m}",
     fallback_severity = vim.diagnostic.severity.ERROR,
-    log = {
-        enable = true,
-        level = "warn",
-        use_console = "async",
-    },
+    log_level = "warn",
+    notify_format = "[null-ls] %s",
     on_attach = nil,
     on_init = nil,
     on_exit = nil,
@@ -99,9 +96,7 @@ Displays all possible log messages and writes them to the null-ls log, which you
 can view with the command `:NullLsLog`. This option can slow down Neovim, so
 it's strongly recommended to disable it for normal use.
 
-`debug = true` is the same as setting `log.level` to `"trace"` and
-`log.use_console` to `false`. For finer-grained control, see the `log` options
-below.
+`debug = true` is the same as setting `log_level` to `"trace"`.
 
 ### default_timeout (number)
 
@@ -109,6 +104,9 @@ Sets the amount of time (in milliseconds) after which built-in sources will time
 out. Note that built-in sources can define their own timeout period and that
 users can override the timeout period on a per-source basis, too (see
 [BUILTIN_CONFIG.md](BUILTIN_CONFIG.md)).
+
+Specifying a timeout with a value less than zero will prevent commands from
+timing out.
 
 ### diagnostics_format (string)
 
@@ -139,24 +137,20 @@ described in [BUILTIN_CONFIG](BUILTIN_CONFIG.md).
 Defines the severity used when a diagnostic source does not explicitly define a
 severity. See `:help diagnostic-severity` for available values.
 
-### log (table)
+### log_level (string, one of "off", "error", "warn", "info", "debug", "trace")
 
-Sets options for null-ls logging.
+Enables or disables logging to file.
 
-#### log.enable (boolean)
+Plugin logs messages on several logging levels to following destinations:
 
-Enables or disables logging altogether. Setting this to `false` will suppress
-important operational warnings and is not recommended.
+- file, can be inspected by `:NullLsLog`.
+- neovim's notification area.
 
-#### log.level (one of "error", "warn", "info", "debug", "trace")
+### notify_format (string, optional)
 
-Sets the logging level.
-
-#### log.use_console (one of "sync", "async", false)
-
-Determines whether to show log output in Neovim's `:messages`. `sync` is slower
-but guarantees that messages will appear in order. Setting this to `false` will
-skip the console but still log to the file specified by `:NullLsLog`.
+Sets the default format for `vim.notify()` messages.
+Can be used to customize 3rd party notification plugins
+like [nvim-notify](https://github.com/rcarriga/nvim-notify).
 
 ### on_attach (function, optional)
 
@@ -221,23 +215,9 @@ diagnostic sources will run upon exiting insert mode, which greatly improves
 performance but can create a slight delay before diagnostics show up. Set this
 to `true` if you don't experience performance issues with your sources.
 
-## Disabling null-ls
-
-You can conditionally block null-ls from setting itself up on Neovim startup by
-setting `vim.g.null_ls_disable = true` before `null_ls.setup` runs.
-
-For example, you can use the following snippet to disable null-ls when using
-[firenvim](https://github.com/glacambre/firenvim), as long as the module
-containing the snippet loads before `null_ls.setup`:
-
-```lua
-if vim.g.started_by_firenvim then
-    vim.g.null_ls_disable = true
-end
-```
-
-You can also deregister sources using the source API, as described in
-[SOURCES](SOURCES.md).
+Note that by default, Neovim will not display updated diagnostics in insert
+mode. Together with the option above, you need to pass `update_in_insert = true`
+to `vim.diagnostic.config` for diagnostics to work as expected. See `:help vim.diagnostic.config` for more info.
 
 ## Explicitly defining the project root
 

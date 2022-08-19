@@ -10,14 +10,23 @@ return {
   ansiblelint = {
     filetypes = { "yaml.ansible" }
   },
+  buf = {
+    filetypes = { "proto" }
+  },
   buildifier = {
     filetypes = { "bzl" }
+  },
+  cfn_lint = {
+    filetypes = { "yaml", "json" }
   },
   checkmake = {
     filetypes = { "make" }
   },
   chktex = {
     filetypes = { "tex" }
+  },
+  clj_kondo = {
+    filetypes = { "clojure" }
   },
   codespell = {
     filetypes = {}
@@ -46,11 +55,17 @@ return {
   editorconfig_checker = {
     filetypes = {}
   },
+  erb_lint = {
+    filetypes = { "eruby" }
+  },
   eslint = {
     filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" }
   },
   eslint_d = {
     filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "vue" }
+  },
+  fish = {
+    filetypes = { "fish" }
   },
   flake8 = {
     filetypes = { "python" }
@@ -58,8 +73,14 @@ return {
   gccdiag = {
     filetypes = { "c", "cpp" }
   },
+  gdlint = {
+    filetypes = { "gdscript" }
+  },
   gitlint = {
     filetypes = { "gitcommit" }
+  },
+  glslc = {
+    filetypes = { "glsl" }
   },
   golangci_lint = {
     filetypes = { "go" }
@@ -88,8 +109,14 @@ return {
   misspell = {
     filetypes = {}
   },
+  mlint = {
+    filetypes = { "matlab" }
+  },
   mypy = {
     filetypes = { "python" }
+  },
+  opacheck = {
+    filetypes = { "rego" }
   },
   php = {
     filetypes = { "php" }
@@ -156,6 +183,12 @@ return {
   },
   shellcheck = {
     filetypes = { "sh" }
+  },
+  solhint = {
+    filetypes = { "solidity" }
+  },
+  sqlfluff = {
+    filetypes = { "sql" }
   },
   standardjs = {
     filetypes = { "javascript", "javascriptreact" }

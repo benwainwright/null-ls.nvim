@@ -26,7 +26,10 @@ end
 local M = {}
 
 local capabilities = {
-    codeActionProvider = true,
+    codeActionProvider = {
+        -- TODO: investigate if we can use this
+        resolveProvider = false,
+    },
     executeCommandProvider = true,
     documentFormattingProvider = true,
     documentRangeFormattingProvider = true,
@@ -42,7 +45,7 @@ local capabilities = {
     textDocumentSync = {
         change = 1, -- prompt LSP client to send full document text on didOpen and didChange
         openClose = true,
-        save = true,
+        save = { includeText = true },
     },
     hoverProvider = true,
 }

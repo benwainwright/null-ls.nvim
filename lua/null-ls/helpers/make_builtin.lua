@@ -13,7 +13,7 @@ local function make_builtin(opts)
         vim.deepcopy(opts.generator_opts) or {},
         vim.deepcopy(opts.generator) or {}
 
-    factory = factory or function()
+    factory = factory or function(_)
         generator.opts = generator_opts
         return generator
     end
@@ -29,10 +29,13 @@ local function make_builtin(opts)
         env = opts.env,
         cwd = opts.cwd,
         diagnostics_format = opts.diagnostics_format,
+        filter = opts.filter,
         diagnostics_postprocess = opts.diagnostics_postprocess,
         dynamic_command = opts.dynamic_command,
+        ignore_stderr = opts.ignore_stderr,
         runtime_condition = opts.runtime_condition,
         timeout = opts.timeout,
+        to_temp_file = opts.to_temp_file,
         -- this isn't ideal, but since we don't have a way to modify on_output's behavior,
         -- it's better than nothing
         on_output = opts.on_output,

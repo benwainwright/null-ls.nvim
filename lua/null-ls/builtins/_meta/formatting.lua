@@ -1,6 +1,9 @@
 -- THIS FILE IS GENERATED. DO NOT EDIT MANUALLY.
 -- stylua: ignore
 return {
+  alejandra = {
+    filetypes = { "nix" }
+  },
   asmfmt = {
     filetypes = { "asm" }
   },
@@ -13,11 +16,26 @@ return {
   bean_format = {
     filetypes = { "beancount" }
   },
+  beautysh = {
+    filetypes = { "bash", "csh", "ksh", "sh", "zsh" }
+  },
+  bibclean = {
+    filetypes = { "bib" }
+  },
   black = {
+    filetypes = { "python" }
+  },
+  blade_formatter = {
+    filetypes = { "blade" }
+  },
+  blue = {
     filetypes = { "python" }
   },
   brittany = {
     filetypes = { "haskell" }
+  },
+  buf = {
+    filetypes = { "proto" }
   },
   buildifier = {
     filetypes = { "bzl" }
@@ -25,8 +43,11 @@ return {
   cabal_fmt = {
     filetypes = { "cabal" }
   },
+  cbfmt = {
+    filetypes = { "markdown", "org" }
+  },
   clang_format = {
-    filetypes = { "c", "cpp", "cs", "java" }
+    filetypes = { "c", "cpp", "cs", "java", "cuda" }
   },
   cljstyle = {
     filetypes = { "clojure" }
@@ -40,6 +61,9 @@ return {
   crystal_format = {
     filetypes = { "crystal" }
   },
+  csharpier = {
+    filetypes = { "cs" }
+  },
   cue_fmt = {
     filetypes = { "cue" }
   },
@@ -47,7 +71,7 @@ return {
     filetypes = { "dart" }
   },
   deno_fmt = {
-    filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact" }
+    filetypes = { "javascript", "javascriptreact", "json", "jsonc", "markdown", "typescript", "typescriptreact" }
   },
   dfmt = {
     filetypes = { "d" }
@@ -58,8 +82,14 @@ return {
   djlint = {
     filetypes = { "django", "jinja.html", "htmldjango" }
   },
+  dprint = {
+    filetypes = { "javascript", "javascriptreact", "typescript", "typescriptreact", "json", "markdown", "toml", "rust", "roslyn" }
+  },
   elm_format = {
     filetypes = { "elm" }
+  },
+  erb_lint = {
+    filetypes = { "eruby" }
   },
   erlfmt = {
     filetypes = { "erlang" }
@@ -88,6 +118,9 @@ return {
   fprettify = {
     filetypes = { "fortran" }
   },
+  gdformat = {
+    filetypes = { "gd", "gdscript", "gdscript3" }
+  },
   gofmt = {
     filetypes = { "go" }
   },
@@ -95,6 +128,9 @@ return {
     filetypes = { "go" }
   },
   goimports = {
+    filetypes = { "go" }
+  },
+  goimports_reviser = {
     filetypes = { "go" }
   },
   golines = {
@@ -109,8 +145,14 @@ return {
   joker = {
     filetypes = { "clj" }
   },
+  jq = {
+    filetypes = { "json" }
+  },
   json_tool = {
     filetypes = { "json" }
+  },
+  just = {
+    filetypes = { "just" }
   },
   ktlint = {
     filetypes = { "kotlin" }
@@ -121,7 +163,13 @@ return {
   lua_format = {
     filetypes = { "lua" }
   },
+  markdown_toc = {
+    filetypes = { "markdown" }
+  },
   markdownlint = {
+    filetypes = { "markdown" }
+  },
+  mdformat = {
     filetypes = { "markdown" }
   },
   mix = {
@@ -139,6 +187,18 @@ return {
   nixpkgs_fmt = {
     filetypes = { "nix" }
   },
+  npm_groovy_lint = {
+    filetypes = { "groovy", "java", "Jenkinsfile" }
+  },
+  ocdc = {
+    filetypes = { "markdown" }
+  },
+  packer = {
+    filetypes = { "hcl" }
+  },
+  perlimports = {
+    filetypes = { "perl" }
+  },
   perltidy = {
     filetypes = { "perl" }
   },
@@ -149,6 +209,9 @@ return {
     filetypes = { "php" }
   },
   phpcsfixer = {
+    filetypes = { "php" }
+  },
+  pint = {
     filetypes = { "php" }
   },
   prettier = {
@@ -190,6 +253,9 @@ return {
   rescript = {
     filetypes = { "rescript" }
   },
+  rome = {
+    filetypes = { "javascript", "typescript" }
+  },
   rubocop = {
     filetypes = { "ruby" }
   },
@@ -211,6 +277,12 @@ return {
   shfmt = {
     filetypes = { "sh" }
   },
+  sql_formatter = {
+    filetypes = { "sql" }
+  },
+  sqlfluff = {
+    filetypes = { "sql" }
+  },
   sqlformat = {
     filetypes = { "sql" }
   },
@@ -225,6 +297,9 @@ return {
   },
   styler = {
     filetypes = { "r", "rmd" }
+  },
+  stylish_haskell = {
+    filetypes = { "haskell" }
   },
   stylua = {
     filetypes = { "lua" }
@@ -244,6 +319,9 @@ return {
   terraform_fmt = {
     filetypes = { "terraform", "tf" }
   },
+  textlint = {
+    filetypes = {}
+  },
   tidy = {
     filetypes = { "html", "xml" }
   },
@@ -256,6 +334,12 @@ return {
   uncrustify = {
     filetypes = { "c", "cpp", "cs", "java" }
   },
+  usort = {
+    filetypes = { "python" }
+  },
+  verible_verilog_format = {
+    filetypes = { "verilog", "systemverilog" }
+  },
   xmllint = {
     filetypes = { "xml" }
   },
@@ -264,5 +348,8 @@ return {
   },
   zigfmt = {
     filetypes = { "zig" }
+  },
+  zprint = {
+    filetypes = { "clojure" }
   }
 }
